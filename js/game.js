@@ -25,7 +25,6 @@ function onInit() {
     gBoard = buildBoard()
     sendLocation()
     renderBoard(gBoard)
-    onCellClicked()
     console.log(gBoard)
 }
 
@@ -89,28 +88,63 @@ function getRandomBombIndex() {
 
 function renderBoard(board) {
 
-    var strHtml = '<tbody'
+    var strHtml = '<tbody>'
 
     for (var i = 0; i < gLevel.SIZE; i++) {
         strHtml += '<tr>'
         for (var j = 0; j < gLevel.SIZE; j++) {
-            var cellClass = `cell cell${i}-${j}`
-            strHtml += `<td class="${cellClass}"></td>`
+            var cellClass = `cell  cell${i}-${j}`
+            strHtml += `<td class="${cellClass}" onclick="onCellClicked(${i},${j})" oncontextmenu="onRightClick(event,${i},${j})"></td>`
         }
         strHtml += '</tr>'
 
     }
-    strHtml += '</tbody'
+    strHtml += '</tbody>'
     document.querySelector('table').innerHTML = strHtml
 }
 
 
-function onCellClicked(elCell, i, j) {
-    var clickedEl = elCell
-
+function renderCell(location, value) {
+    var tableCell = document.querySelector(`.cell.cell${location.i}-${location.j}`)
+    if (!tableCell) return console.warn('cell not found', location)
+    tableCell.innerText = value
 }
 
 
-function checkGameOver() {
+function onCellClicked(i, j) {
+
+    if (gBoard[i][j].isRevealed) return
+    if (gBoard[i][j].isMarked) return
+    gBoard[i][j].isRevealed = true
+    if (gBoard[i][j].isMine) {
+        renderCell({ i, j }, BOMB)
+        return
+        // GameOver()
+    }
+    gBoard[i][j].minesAroundCount === 0 ? renderCell({ i, j }, EMPTY) : renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+    // onCellClicked(recursive function call)
 
 }
+
+function onRightClick(event, i, j) {
+    event.preventDefault()
+    if (!gBoard[i][j].isMarked) {
+        gBoard[i][j].isMarked = true
+        gGame.markedCount++
+        renderCell({ i, j }, FLAG)
+    }
+}
+
+
+
+
+
+
+function expandReveal(elCell, i, j) {
+    // if(gBoard[i][j].minesAroundCount === 0)
+}
+
+
+// function checkGameOver() {
+//     if (gGame.markedCount &&)
+// }
