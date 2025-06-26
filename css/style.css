@@ -32,11 +32,37 @@ h1 {
   display: none;
 }
 
-.msg{
+.msg {
   text-align: center;
 }
 
-.buttons{
+.buttons {
   width: 400px;
-  margin: auto
+  border: none;
+  padding: 20px;
+}
+
+.revealed {
+  background-color: antiquewhite;
+}
+
+span {
+  margin: auto;
+}
+
+body {
+  overflow: hidden;
+}
+
+.smiley-btn {
+  display: block;
+  margin: 20px auto;
+}
+
+.btn {
+  background-color: blanchedalmond;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
 }

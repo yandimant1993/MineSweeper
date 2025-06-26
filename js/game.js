@@ -12,8 +12,8 @@ var gFirstClick = true
 
 
 var gLevel = {
-    SIZE: 8,
-    MINES: 2
+    SIZE: 4,
+    MINES: 3
 }
 
 var gGame = {
@@ -28,13 +28,12 @@ var gBoard
 function onInit() {
     gGame.isOn = true
     gBoard = buildBoard()
-    sendLocation()
     renderBoard(gBoard)
-    console.log(gBoard)
+
 }
 
 
-function buildBoard(firstClickIdx, firstClickIdy) {
+function buildBoard() {
 
     var mat = []
     for (var i = 0; i < gLevel.SIZE; i++) {
@@ -46,14 +45,6 @@ function buildBoard(firstClickIdx, firstClickIdy) {
                 isMine: false,
                 isMarked: false
             }
-        }
-    }
-    // console.log(bombs)
-    for (var k = 0; k < gLevel.MINES;) {
-        var location = getRandomBombIndex()
-        if (!mat[location.randIdx][location.randIdy].isMine && !(location.randIdx === firstClickIdx && location.randIdy === firstClickIdy)) {
-            mat[location.randIdx][location.randIdy].isMine = true
-            k++
         }
     }
     return mat
@@ -80,14 +71,6 @@ function setMinesNegsCount(location) {
             if (gBoard[i][j].isMine) { gBoard[location.i][location.j].minesAroundCount++ }
         }
     }
-    return gBoard
-}
-
-
-function getRandomBombIndex() {
-    var randIdx = getRandomIntInclusive(0, gLevel.SIZE - 1)
-    var randIdy = getRandomIntInclusive(0, gLevel.SIZE - 1)
-    return { randIdx, randIdy }
 }
 
 
@@ -111,9 +94,12 @@ function renderBoard(board) {
 
 function renderCell(location, value) {
     var tableCell = document.querySelector(`.cell.cell${location.i}-${location.j}`)
-    console.log(`Rendering cell at [${location.i},${location.j}] with value:`, value, tableCell)
-    console.log(tableCell)
     tableCell.innerText = value
+
+    if (value !== FLAG && value !== BOMB) tableCell.classList.add('revealed')
+    else if (value !== FLAG && value !== BOMB) {
+        tableCell.classList.add('revealed')
+    }
 }
 
 
@@ -125,19 +111,52 @@ function onCellClicked(i, j) {
     if (gFirstClick) {
         timer()
         gFirstClick = false
+        placeMinesNoFirstClick(i, j)
+        sendLocation()
+        gBoard[i][j].isRevealed = false
+        gGame.revealedCount++
+        gBoard[i][j].minesAroundCount === 0 ? renderCell({ i, j }, EMPTY) : renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+
+
     }
-    gGame.revealedCount++
-    gBoard[i][j].isRevealed = true
-    if (gBoard[i][j].isMine) {
+    else if (gBoard[i][j].isMine) {
         renderCell({ i, j }, BOMB)
-        isWin = false
-        gameOver(isWin)
-        return
+        gBoard[i][j].isRevealed = true
+        lives--
+        updateLivesDisplay()
+
+        if (lives === 0) {
+            gameOver(false)
+        } else {
+            setTimeout(() => {
+                if (!gGame.isOn) return
+                gBoard[i][j].isRevealed = false
+                renderCell({ i, j }, EMPTY)
+            }, 1000)
+        }
     }
-    gBoard[i][j].minesAroundCount === 0 ? renderCell({ i, j }, EMPTY) : renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+    else {
+        gGame.revealedCount++
+        gBoard[i][j].isRevealed = true
+        gBoard[i][j].minesAroundCount === 0 ? renderCell({ i, j }, EMPTY) : renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+    }
     // onCellClicked(recursive function call)
     checkGameOver()
 }
+
+
+
+function placeMinesNoFirstClick(iIndex, jIndex) { // there are not any mines yet because its first click
+    var minesPlaced = 0
+    while (minesPlaced < gLevel.MINES) {
+        var randPlace = findEmptyPos()
+        if (!randPlace) break
+        if (randPlace.i === iIndex && randPlace.j === jIndex) continue
+        gBoard[randPlace.i][randPlace.j].isMine = true
+        minesPlaced++
+    }
+}
+
 
 
 function onRightClick(event, i, j) {
@@ -157,12 +176,8 @@ function onRightClick(event, i, j) {
 }
 
 
-// function expandReveal(elCell, i, j) {
-//     if(gBoard[i][j].minesAroundCount === 0)
-// }
-
 function checkGameOver() {
-    if (gGame.markedCount === gLevel.MINES && gGame.revealedCount === gLevel.SIZE ** 2 - gGame.MINES) {
+    if (gGame.markedCount === gLevel.MINES && gGame.revealedCount === gLevel.SIZE ** 2 - gLevel.MINES) {
         isWin = true
         gameOver(isWin)
     }
@@ -171,13 +186,13 @@ function checkGameOver() {
 
 function gameOver(status) {
     clearInterval(gInterval)
+    gGame.isOn = false
+
     if (status) {
-        renderMsg('Congratulations!😄')
-        gGame.isOn = false
-        return
+        renderMsg('Congratulations! 😄')
+        updateSmiley('😎')
     } else {
-        renderMsg('Try again!😞')
-        gGame.isOn = false
+        updateSmiley('🤯')
         for (var i = 0; i < gBoard.length; i++) {
             for (var j = 0; j < gBoard[i].length; j++) {
                 if (gBoard[i][j].isMine) {
@@ -211,20 +226,69 @@ function timer() {
 
 function changeize(size) {
     if (size === 'Easy') {
-        gLevel.SIZE = 8
-        gLevel.MINES = 6
+        gLevel.SIZE = 4
+        gLevel.MINES = 3
     }
     else if (size === 'Hard') {
-        gLevel.SIZE = 15
-        gLevel.MINES = 20
+        console.log('hello')
+        gLevel.SIZE = 8
+        gLevel.MINES = 14
     }
     else {
-        gLevel.SIZE = 21
-        gLevel.MINES = 53
+        gLevel.SIZE = 12
+        gLevel.MINES = 32
     }
     onInit()
 }
 
 
+function findEmptyPos() {
+    const emptyPositions = []
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[0].length; j++) {
+            const cell = gBoard[i][j]
+            if (!cell.isMine && !cell.isRevealed && !cell.isMarked) {
+                const pos = { i, j }
+                emptyPositions.push(pos)
+            }
+        }
+    }
 
+    if (emptyPositions.length === 0) return null
+    const randIdx = getRandomInt(0, emptyPositions.length)
+    const emptyPos = emptyPositions[randIdx]
+    return emptyPos
+}
+
+
+function updateLivesDisplay() {
+    document.querySelector('.lives').innerText = `Lives: ${lives}`
+}
+
+
+function updateSmiley(smiley) {
+    document.querySelector('.smiley-btn').innerText = smiley
+}
+
+function onSmileyClick() {
+    updateSmiley('😃')
+    lives = 3
+    isWin = false
+    gSeconds = 0
+    gMinutes = 0
+    gFirstClick = true
+    gGame = {
+        isOn: true,
+        revealedCount: 0,
+        markedCount: 0,
+        secsPassed: 0
+    }
+    clearInterval(gInterval)
+    updateLivesDisplay()
+    onInit()
+}
+
+function darkMode() {
+
+}
 
