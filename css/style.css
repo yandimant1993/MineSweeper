@@ -1,25 +1,27 @@
 body {
   background-color: cornsilk;
+  text-align: center;
 }
 
 table {
   margin: 40px auto;
   border-radius: 8px;
-  padding: 6px;
+}
+
+.container {
+  text-align: center;
 }
 
 td {
-  width: 30px;
-  height: 30px;
-  border: 2px solid #555;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #555;
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
-  background-color: #e0e7ff;
+  background-color: #4262ce;
   border-radius: 6px;
-  transition: all 0.2s ease-out;
-
-
+  transition: 0.2s
 }
 
 h1 {
@@ -40,6 +42,7 @@ h1 {
   width: 400px;
   border: none;
   padding: 20px;
+  display: inline-block;
 }
 
 .revealed {
@@ -50,13 +53,15 @@ span {
   margin: auto;
 }
 
-body {
-  overflow: hidden;
-}
 
 .smiley-btn {
   display: block;
   margin: 20px auto;
+  padding: 15px;
+  background-color: aquamarine;
+  cursor: pointer;
+  border-radius: 5px;
+  width: 70px;
 }
 
 .btn {
@@ -65,4 +70,34 @@ body {
   padding: 10px;
   border-radius: 10px;
   cursor: pointer;
+  margin: auto;
+}
+
+.dark-mode {
+  background-color: rgb(199, 21, 21);
+  color: rgb(235, 240, 244);
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  margin: auto;
+}
+
+.body-dark-mode {
+  background-color: black;
+  color: rgb(233, 14, 36);
+}
+
+.hint {
+  color: green;
+  padding: 15px;
+  background-color: #bfde35;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.cell:hover {
+  background-color: #b2f0ff;
+  cursor: pointer;
+  transition: 0.8s;
 }

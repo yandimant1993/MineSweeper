@@ -9,34 +9,35 @@
 </head>
 
 <body onload="onInit()">
+    <div class="container">
+        <h1>Welcome to MinesSweeper !</h1>
 
-    <h1>Welcome to MinesSweeper !</h1>
+        <table></table>
 
-    <table></table>
+        <div class="msg hidden"></div>
+        <br>
 
-    <div class="msg hidden"></div>
-    <br>
+        <span>Time running : 00:00</span>
+        <br>
+
+        <div class="buttons">
+            <button class="btn" onclick="changeize('Easy')">Easy</button>
+            <button class="btn" onclick="changeize('Hard')">Hard</button>
+            <button class="btn" onclick="changeize('Extreme')">Extreme</button>
+        </div>
 
 
-    <span>Time running : 00:00</span>
-    <br>
+        <button class="smiley-btn" onclick="onSmileyClick()">😃</button>
+        <button class="hint" onclick="hintButton()">💡x 3</button>
+        <br>
+        <br>
+        <div class="lives">Lives: 3♥</div>
+        <br>
+        <br>
 
-    <div class="buttons">
-        <button class="btn" onclick="changeize('Easy')">Easy</button>
-        <button class="btn" onclick="changeize('Hard')">Hard</button>
-        <button class="btn" onclick="changeize('Extreme')">Extreme</button>
+        <button class="dark-mode" onclick="darkMode()">Dark Mode</button>
+
     </div>
-
-
-    <button class="smiley-btn" onclick="onSmileyClick()">😃</button>
-
-
-    <div class="lives">Lives: 3♥</div>
-
-
-    <button class="mode" onclick="darkMode()">Dark Mode</button>
-
-
     <script src="js/board.js"></script>
     <script src="js/game.js"></script>
     <script src="js/utils.js"></script>

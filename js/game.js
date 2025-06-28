@@ -9,6 +9,9 @@ var isWin = false
 var gSeconds = 0
 var gMinutes = 0
 var gFirstClick = true
+var hints = 3
+var gIsHint = false
+var isUndo = false
 
 
 var gLevel = {
@@ -94,12 +97,10 @@ function renderBoard(board) {
 
 function renderCell(location, value) {
     var tableCell = document.querySelector(`.cell.cell${location.i}-${location.j}`)
-    tableCell.innerText = value
+    tableCell.innerText = value === 0 ? '' : value
 
     if (value !== FLAG && value !== BOMB) tableCell.classList.add('revealed')
-    else if (value !== FLAG && value !== BOMB) {
-        tableCell.classList.add('revealed')
-    }
+    tableCell.classList.add('revealed')
 }
 
 
@@ -107,6 +108,12 @@ function onCellClicked(i, j) {
     if (!gGame.isOn) return
     if (gBoard[i][j].isRevealed) return
     if (gBoard[i][j].isMarked) return
+
+    if (gIsHint) {
+        hintRevealed({ i, j })
+        gIsHint = false
+        return
+    }
 
     if (gFirstClick) {
         timer()
@@ -139,8 +146,12 @@ function onCellClicked(i, j) {
         gGame.revealedCount++
         gBoard[i][j].isRevealed = true
         gBoard[i][j].minesAroundCount === 0 ? renderCell({ i, j }, EMPTY) : renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+        if (gBoard[i][j].minesAroundCount === 0) {
+            expendRestBoard(i, j)
+        }
+        else
+            renderCell({ i, j }, gBoard[i][j].minesAroundCount)
     }
-    // onCellClicked(recursive function call)
     checkGameOver()
 }
 
@@ -273,6 +284,8 @@ function updateSmiley(smiley) {
 function onSmileyClick() {
     updateSmiley('😃')
     lives = 3
+    hints = 3
+    document.querySelector('.hint').innerText = `💡 x ${hints}`
     isWin = false
     gSeconds = 0
     gMinutes = 0
@@ -289,6 +302,65 @@ function onSmileyClick() {
 }
 
 function darkMode() {
-
+    document.querySelector('body').classList.toggle('body-dark-mode')
 }
+
+
+function hintRevealed(location) {
+    if (!gBoard[location.i][location.j].isRevealed && hints > 0) {
+        hints--
+        document.querySelector('.hint').innerText = `💡 x ${hints}`
+        revealCellNegs(location)
+        setTimeout(() => hideCellNegs(location), 1500)
+    }
+    else
+        return
+}
+
+
+function revealCellNegs(location) {
+    for (var i = location.i - 1; i <= location.i + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+
+        for (var j = location.j - 1; j <= location.j + 1; j++) {
+            if (j < 0 || j >= gBoard[i].length) continue
+
+            if (!gBoard[i][j].isRevealed) {
+                gBoard[i][j].isRevealed = true
+            }
+            if (gBoard[i][j].isMine)
+                renderCell({ i, j }, BOMB)
+            else if (gBoard[i][j].minesAroundCount === 0)
+                renderCell({ i, j }, EMPTY)
+            else
+                renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+
+
+        }
+    }
+}
+
+function hideCellNegs(location) {
+    for (var i = location.i - 1; i <= location.i + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+
+        for (var j = location.j - 1; j <= location.j + 1; j++) {
+            if (j < 0 || j >= gBoard[i].length) continue
+            if (gBoard[i][j].isRevealed) {
+                gBoard[i][j].isRevealed = false
+                renderCell({ i, j }, EMPTY)
+
+            }
+        }
+    }
+}
+
+function hintButton() {
+    if (hints <= 0) return
+    gIsHint = true
+}
+
+
+
+
 
